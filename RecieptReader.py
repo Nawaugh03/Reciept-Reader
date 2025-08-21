@@ -1,6 +1,9 @@
 import cv2
 import re
+import os
 import pytesseract
+import matplotlib.pyplot as plt
+from matplotlib.widgets import RectangleSelector
 import pandas as pd
 
 # If on Windows and PATH not set, manually add tesseract.exe path:
@@ -8,6 +11,53 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 
 # Load the image
 img_path = 'Recipts/Reciept1.jpg'
+img = cv2.imread(img_path)
+img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+# Create output folder for crops
+output_folder = "crops"
+os.makedirs(output_folder, exist_ok=True)
+
+# Store rectangles
+rectangles = []
+
+def line_select_callback(eclick, erelease):
+    """Callback when a rectangle is drawn"""
+    x1, y1 = int(eclick.xdata), int(eclick.ydata)
+    x2, y2 = int(erelease.xdata), int(erelease.ydata)
+    rectangles.append((x1, y1, x2, y2))
+    print(f"Rectangle selected: ({x1}, {y1}) -> ({x2}, {y2})")
+
+def toggle_selector(event):
+    if event.key in ['Q', 'q']:  # Press Q to quit
+        plt.close()
+
+# Create interactive plot
+fig, ax = plt.subplots()
+ax.imshow(img_rgb)
+toggle = RectangleSelector(
+    ax, line_select_callback,
+    useblit=True, button=[1], minspanx=5, minspany=5,
+    spancoords='pixels', interactive=True
+)
+
+plt.connect('key_press_event', toggle_selector)
+plt.show()
+
+# Process selected regions
+for i, (x1, y1, x2, y2) in enumerate(rectangles, start=1):
+    crop = img[y1:y2, x1:x2]
+
+    # Save crop as image
+    crop_filename = os.path.join(output_folder, f"crop_{i}.png")
+    cv2.imwrite(crop_filename, crop)
+
+    # OCR
+    text = pytesseract.image_to_string(crop)
+
+    print(f"Region {i} saved as {crop_filename}")
+    print(f"OCR Result:\n{text.strip()}\n{'-'*50}")
+"""
 img = cv2.imread(img_path)
 if img is None:
     raise FileNotFoundError(f"Image not found. Check the file path: {img_path}")
@@ -40,3 +90,4 @@ else:
     print("Time:", time.group(1) if time else None)
     print("Total:", total.group(1) if total else None)
     print("Tip:", tip.group(1) if tip else None)
+"""
