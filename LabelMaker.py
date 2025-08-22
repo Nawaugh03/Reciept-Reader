@@ -1,8 +1,10 @@
 import cv2
 import os
-
+import re
+import pytesseract
 folder_name = "Receipts"
 output_folder = "Labeled_pics"
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 os.makedirs(output_folder, exist_ok=True)
 
 # Globals
@@ -10,7 +12,15 @@ ref_point = []
 cropping = False
 coords = []
 img_name = ""
-scale_x, scale_y = 1.0, 1.0  # Scaling factors
+newfilename=""
+Online=True
+scale_x, scale_y = 2, 2  # Scaling factors
+CustomerInc=1
+datetimeInc=1
+totalInc=1
+tipInc=1
+MiscInc=1
+##############################################################################
 
 def click_and_crop(event, x, y, flags, param):
     global ref_point, cropping, coords
@@ -62,7 +72,7 @@ for filename in os.listdir(folder_name):
         print(f"\n📸 Processing {filename}")
         print("Draw a rectangle. Press 'n' for next image, 'r' to reset, or 'q' to quit.")
 
-        while True:
+        while Online:
             cv2.imshow("image", display_img)
             key = cv2.waitKey(1) & 0xFF
 
@@ -73,21 +83,60 @@ for filename in os.listdir(folder_name):
             elif key == ord("n"):  # Next image
                 break
             elif key == ord("q"):  # Quit
-                exit()
+                Online = False
+                break
 
         # Save cropped regions from original image Didnt saved the cropped images
         for i, ((x1, y1), (x2, y2)) in enumerate(coords):
             xmin, xmax = sorted([x1, x2])
             ymin, ymax = sorted([y1, y2])
             crop = original_img[ymin:ymax, xmin:xmax]
+            # OCR
+            text = pytesseract.image_to_string(crop)
 
-            label = input(f"Enter label for crop {i+1} (Customer/Total/Date/Tip): ").strip()
-            save_name = f"{os.path.splitext(filename)[0]}_{label}_{i+1}.jpg"
+            customer_pattern= r"(?:Order(?: by)?[:\s]+([A-Za-z]+))|(?:Card.*?\n([A-Za-z]+\s+[A-Za-z]+))"
+            datetime_pattern = r"(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s*(?:AM|PM))"
+            total_pattern = r"Total\s+\$?([\d]+\.\d{2})"
+            tip_pattern = r"Tip\s+\$?([\d]+\.\d{2})"
+
+            customer_match = re.search(customer_pattern, text, re.IGNORECASE)
+            datetime_match = re.search(datetime_pattern, text)
+            total_match = re.search(total_pattern, text, re.IGNORECASE)
+            tip_match = re.search(tip_pattern, text, re.IGNORECASE)
+
+            customer = customer_match.group(1) if customer_match and customer_match.group(1) else (customer_match.group(2) if customer_match else None)
+            datetime = datetime_match.group(1) if datetime_match else None
+            total = total_match.group(1) if total_match else None
+            tip = tip_match.group(1) if tip_match else None
+
+            if customer_match:
+                label="Customer"
+                newfilename = f"{label}_{CustomerInc}.png"
+                CustomerInc += 1
+            elif datetime_match:
+                label="DateTime"
+                newfilename = f"{label}_{datetimeInc}.png"
+                datetimeInc += 1
+            elif total_match:
+                label="Total"
+                newfilename = f"{label}_{totalInc}.png"
+                totalInc += 1
+            elif tip_match:
+                label="Tip"
+                newfilename = f"{label}_{tipInc}.png"
+                tipInc += 1
+            else:
+                label="Misc"
+                newfilename = f"{label}_{MiscInc}.png"
+                MiscInc += 1
+            #label = input(f"Enter label for crop {i+1} (Customer/Total/Date/Tip): ").strip()
+            save_name = newfilename
             save_path = os.path.join(output_folder, save_name)
             cv2.imwrite(save_path, crop)
             print(f"✅ Saved crop: {save_path}")
 
-cv2.destroyAllWindows()
+        if Online == False:
+            cv2.destroyAllWindows()
 
 """
 Sample idea for rectangle selection and OCR processing
