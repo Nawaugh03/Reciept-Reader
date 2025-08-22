@@ -59,16 +59,17 @@ for img_rgb in imaages[0:1]:
     plt.show()
 
     # Process selected regions
-    CustomerInc=1
-    datetimeInc=1
-    totalInc=1
-    tipInc=1
-    MiscInc=1
+    CustomerInc=0
+    datetimeInc=0
+    totalInc=0
+    tipInc=0
+    MiscInc=0
     ##############################################################################
     # Iterate through rectangles and perform OCR
     for i, (x1, y1, x2, y2) in enumerate(rectangles, start=1):
         crop = img[y1:y2, x1:x2]
         label=""
+        newfilename=""
         # Save crop as image
         crop_filename = os.path.join(output_folder, f"crop_image.png")
         cv2.imwrite(crop_filename, crop)
@@ -93,18 +94,28 @@ for img_rgb in imaages[0:1]:
 
         if customer_match:
             label="Customer"
+            newfilename = f"{label}_{CustomerInc}.png"
             CustomerInc += 1
         elif datetime_match:
             label="DateTime"
+            newfilename = f"{label}_{datetimeInc}.png"
             datetimeInc += 1
         elif total_match:
             label="Total"
+            newfilename = f"{label}_{totalInc}.png"
             totalInc += 1
         elif tip_match:
             label="Tip"
+            newfilename = f"{label}_{tipInc}.png"
             tipInc += 1
         else:
-            label=""
+            label="Misc"
+            newfilename = f"{label}_{MiscInc}.png"
+            MiscInc += 1
+            
+        save_path = os.path.join(output_folder, newfilename)
+        os.rename(crop_filename, save_path)
+        
         print(f"Region {i} saved as {crop_filename}")
         #print(f"OCR Result:\n{text.strip()}\n{'-'*50}")
 
