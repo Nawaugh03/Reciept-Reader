@@ -40,6 +40,7 @@ This functions is not working properly, it is not properly selecting the area.
 """
 def line_select_callback(eclick, erelease):
     """Callback when a rectangle is drawn"""
+    global current_img, coords
     x1, y1 = int(eclick.xdata), int(eclick.ydata)
     x2, y2 = int(erelease.xdata), int(erelease.ydata)
     # Ensure proper ordering
@@ -60,6 +61,7 @@ def toggle_selector(event):
     if event.key in ['Q', 'q']:  # Press Q to quit
         plt.close()
 for img_rgb in imaages[0:1]:
+    print(img_rgb.name)
     # Create interactive plot
     fig, ax = plt.subplots()
     ax.imshow(img_rgb)
@@ -73,14 +75,14 @@ for img_rgb in imaages[0:1]:
     plt.show()
 
     # Process selected regions
-    CustomerInc=0
-    datetimeInc=0
-    totalInc=0
-    tipInc=0
-    MiscInc=0
+    CustomerInc=1
+    datetimeInc=1
+    totalInc=1
+    tipInc=1
+    MiscInc=1
     ##############################################################################
     # Iterate through rectangles and perform OCR
-    for i, (x1, y1, x2, y2) in enumerate(rectangles, start=1):
+    for i, (x1, y1, x2, y2) in enumerate(rectangles):
         crop = img[y1:y2, x1:x2]
         label=""
         newfilename=""
