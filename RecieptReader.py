@@ -28,7 +28,8 @@ for img_path in imaage_path:
     img = cv2.imread(img_path)
     if img is None:
         raise FileNotFoundError(f"Image not found. Check the file path: {img_path}")
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    resized = cv2.resize(img, (2000, 1500))  # Resize for better visibility
+    img_rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
     imaages.append(img_rgb)
 
 
