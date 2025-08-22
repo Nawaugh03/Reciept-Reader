@@ -28,20 +28,33 @@ for img_path in imaage_path:
     img = cv2.imread(img_path)
     if img is None:
         raise FileNotFoundError(f"Image not found. Check the file path: {img_path}")
-    resized = cv2.resize(img, (2000, 1500))  # Resize for better visibility
-    img_rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     imaages.append(img_rgb)
 
 
 # Store rectangles
 rectangles = []
-
+"""
+# Function to handle rectangle selection
+This functions is not working properly, it is not properly selecting the area.
+"""
 def line_select_callback(eclick, erelease):
     """Callback when a rectangle is drawn"""
     x1, y1 = int(eclick.xdata), int(eclick.ydata)
     x2, y2 = int(erelease.xdata), int(erelease.ydata)
-    rectangles.append((x1, y1, x2, y2))
-    print(f"Rectangle selected: ({x1}, {y1}) -> ({x2}, {y2})")
+    # Ensure proper ordering
+    xmin, xmax = sorted([x1, x2])
+    ymin, ymax = sorted([y1, y2])
+
+    rectangles.append((xmin, ymin, xmax, ymax))
+     # Draw rectangle on Matplotlib image
+    rect = plt.Rectangle((xmin, ymin), xmax - xmin, ymax - ymin,
+                         fill=False, color='red', linewidth=2)
+    ax.add_patch(rect)
+    plt.draw()
+
+    print(f"Selected region: ({xmin}, {ymin}) -> ({xmax}, {ymax})")
+
 
 def toggle_selector(event):
     if event.key in ['Q', 'q']:  # Press Q to quit
