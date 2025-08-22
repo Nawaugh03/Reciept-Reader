@@ -14,7 +14,9 @@ coords = []
 img_name = ""
 newfilename=""
 Online=True
-scale_x, scale_y = 2, 2  # Scaling factors
+max_width = 1200
+max_height = 720
+scale_x, scale_y = 1, 1  # Scaling factors
 CustomerInc=1
 datetimeInc=1
 totalInc=1
@@ -56,9 +58,16 @@ for filename in os.listdir(folder_name):
 
         # Calculate resize scale
         h, w = original_img.shape[:2]
-        new_width = 1000
-        scale = new_width / w
-        new_height = int(h * scale)
+        aspect_ratio= w / h
+        # Calculate new width and height while keeping aspect ratio
+        if w / max_width > h / max_height:
+            # Width is the limiting factor
+            new_width = max_width
+            new_height = int(max_width / aspect_ratio)
+        else:
+            # Height is the limiting factor
+            new_height = max_height
+            new_width = int(max_height * aspect_ratio)
         display_img = cv2.resize(original_img, (new_width, new_height))
 
         # Scaling factors
