@@ -102,10 +102,10 @@ for filename in os.listdir(folder_name):
             crop = original_img[ymin:ymax, xmin:xmax]
             # OCR
             text = pytesseract.image_to_string(crop)
-
+            print(f"OCR Result for crop {i+1}:\n{text.strip()}\n{'-'*50}")
             customer_pattern= r"(?:Order(?: by)?[:\s]+([A-Za-z]+))|(?:Card.*?\n([A-Za-z]+\s+[A-Za-z]+))"
             datetime_pattern = r"(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s*(?:AM|PM))"
-            total_pattern = r"Total\s+\$?([\d]+\.\d{2})"
+            total_pattern = r"Total\s*\$?(\d+\.\s*\d{2})"
             tip_pattern = r"Tip\s+\$?([\d]+\.\d{2})"
 
             customer_match = re.search(customer_pattern, text, re.IGNORECASE)
