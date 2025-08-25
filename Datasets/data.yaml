@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ['Customer_Name', 'DateTime', 'Tip', 'Total']
+
+roboflow:
+  workspace: reciept-classification
+  project: detect-reciept-eumfa
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/reciept-classification/detect-reciept-eumfa/dataset/2

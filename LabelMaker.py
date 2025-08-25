@@ -101,7 +101,16 @@ for filename in os.listdir(folder_name):
             ymin, ymax = sorted([y1, y2])
             crop = original_img[ymin:ymax, xmin:xmax]
             # OCR
-            text = pytesseract.image_to_string(crop)
+            # Convert to grayscale for better OCR accuracy
+            gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+
+            # Optional preprocessing for cleaner OCR
+            gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+            scale = 4  # Upscale by 3x
+            resized = cv2.resize(gray, None, fx=scale, fy=scale, interpolation=cv2.INTER_CUBIC)
+
+            text = pytesseract.image_to_string(resized)
             print(f"OCR Result for crop {i+1}:\n{text.strip()}\n{'-'*50}")
             customer_pattern= r"(?:Order(?: by)?[:\s]+([A-Za-z]+))|(?:Card\s*#?.*?\n([A-Za-z][A-Za-z\s]+)(?=\nLoyalty))"
             datetime_pattern = r"(\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}:\d{2}\s*(?:AM|PM))"
