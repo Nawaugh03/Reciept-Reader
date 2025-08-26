@@ -5,34 +5,34 @@ import pytesseract
 from ultralytics import YOLO
 
 # Load YOLO model (start from pretrained weights)
-#model = YOLO("yolov8n.pt")  # 'n' = nano, small and fast to train
+model = YOLO("yolov8n.pt")  # 'n' = nano, small and fast to train
 # Load your trained weights (best.pt)
-model = YOLO("runs/detect/train9/weights/best.pt")
+#model = YOLO("runs/detect/train9/weights/best.pt")
 
 #Image to test
-Image="Receipts/Receipt10.jpg"
+Image="Receipts/Receipt1.jpg"
 
 # If on Windows and PATH not set, manually add tesseract.exe path:
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 
-"""
+
 # Train the model
 model.train(
     data="Datasets/data.yaml",  # path to data.yaml
-    epochs=50,                           # number of training epochs
+    epochs=100,                           # number of training epochs
     imgsz=640,                           # image size
     batch=16                             # adjust based on GPU
 )
+
+
+
 """
-
-
-
 # Run on one image
 results = model(Image, save=True, conf=0.5)  
 
-"""
-Extract the predictions
+
+#Extract the predictions
 for r in results:
     for box in r.boxes:
         cls_id = int(box.cls[0])                # class id
@@ -41,8 +41,9 @@ for r in results:
         xyxy = box.xyxy[0].tolist()             # [x1, y1, x2, y2]
         
         print(f"{label}: {conf:.2f}, {xyxy}")
-"""
 
+
+#get results
 img = cv2.imread(Image)
 custom_config_number = r'--oem 3 --psm 6 outputbase digits'
 custom_config_text= r'--oem 3 --psm 6 tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
@@ -72,7 +73,7 @@ for r in results:
 
         print(f"{label}: {variable}")
 
-"""
+
 # Save Reuslts to CSV
 fields = ['Customer_Name', 'DateTime', 'Tip', 'Total']
 data = {f: "" for f in fields}
