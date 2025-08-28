@@ -6,19 +6,20 @@ import pytesseract
 from ultralytics import YOLO
 import pandas as pd
 # Load YOLO model (start from pretrained weights)
-#model = YOLO("yolov8n.pt")  # 'n' = nano, small and fast to train
+model = YOLO("yolov8n.pt")  # 'n' = nano, small and fast to train
 
 # Load your trained weights (best.pt)
-model = YOLO("runs/detect/train10/weights/best.pt")
+#model = YOLO("runs/detect/train10/weights/best.pt")
+
+#model.eval()  # set model to evaluation mode
 
 #Image to test
-Image="Receipts/Receipt16.jpg"
+Image="Receipts/Receipt1.jpg"
 
 # If on Windows and PATH not set, manually add tesseract.exe path:
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 
-"""
 # Train the model
 model.train(
     data="Datasets/data.yaml",  # path to data.yaml
@@ -27,6 +28,8 @@ model.train(
     batch=16                             # adjust based on GPU
 )
 
+
+"""
 
 
 
@@ -44,11 +47,12 @@ for r in results:
         
         print(f"{label}: {conf:.2f}, {xyxy}")
 
-"""
+
 #get results
 
 # Run on one image
-results = model(Image, save=True, conf=0.5)  
+#results = model(Image, save=True, conf=0.5)  
+
 custom_config_number = r'--oem 3 --psm 6 outputbase digits'
 custom_config_text= r'--oem 3 --psm 6 tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 variable=0
@@ -56,9 +60,11 @@ variable=0
 #df=pd.DataFrame(columns=fields)
 folder_name= "Receipts"
 # Get all image paths with valid extensions
-image_paths = [os.path.join(folder_name, f) for f in os.listdir(folder_name) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+#image_paths = [os.path.join(folder_name, f) for f in os.listdir(folder_name) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+image_paths = [Image]
 for img_path in image_paths:
     img = cv2.imread(img_path)
+    results = model(img,save=True,conf=0.5)
     print(f"Processing image: {img_path}\n")
     for r in results:
         for box in r.boxes:
@@ -82,11 +88,11 @@ for img_path in image_paths:
                 variable = ' '.join(cleaned_text)
             else:
                 variable=pytesseract.image_to_string(crop, config=custom_config_text).strip()
-
-            #print(f"{label}: {variable}")
+            conf = float(box.conf[0])
+            print(f"{ label}: {variable} \n{conf:.2f}, {xyxy}")
             
 
-"""
+
 # Save Reuslts to CSV
 fields = ['Customer_Name', 'DateTime', 'Tip', 'Total']
 data = {f: "" for f in fields}

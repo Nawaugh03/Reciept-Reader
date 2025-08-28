@@ -1,4 +1,4 @@
-# Detect Reciept > 2025-08-25 4:48pm
+# Detect Reciept > 2025-08-28 7:14pm
 https://universe.roboflow.com/reciept-classification/detect-reciept-eumfa
 
 Provided by a Roboflow user
