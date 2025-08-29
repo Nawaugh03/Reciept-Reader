@@ -23,12 +23,18 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 # Train the model
 model.train(
     data="Datasets/data.yaml",  # path to data.yaml
-    epochs=100,                           # number of training epochs
+    epochs=50,                           # number of training epochs
     imgsz=640,                           # image size
-    batch=16                             # adjust based on GPU
+    batch=16,                             # adjust based on GPU
+    porject="runs/detect",  # save to project/name
+    name="Fine_tuned_model",  # name of the training run
 )
 
+metrics = model.val()
+print(metrics)
 
+results = model(Image)
+results.show()
 """
 
 
