@@ -5,11 +5,12 @@ import re
 import pytesseract
 from ultralytics import YOLO
 import pandas as pd
+from matplotlib import pyplot as plt
 # Load YOLO model (start from pretrained weights)
-model = YOLO("yolov8n.pt")  # 'n' = nano, small and fast to train
+model = YOLO("yolov8s.pt")  # 'n' = nano, small and fast to train
 
 # Load your trained weights (best.pt)
-#model = YOLO("runs/detect/train10/weights/best.pt")
+#model = YOLO("runs/detect/Fine_tuned_model/weights/best.pt")
 
 #model.eval()  # set model to evaluation mode
 
@@ -23,19 +24,34 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 # Train the model
 model.train(
     data="Datasets/data.yaml",  # path to data.yaml
-    epochs=50,                           # number of training epochs
+    epochs=75,                           # number of training epochs
     imgsz=640,                           # image size
     batch=16,                             # adjust based on GPU
-    porject="runs/detect",  # save to project/name
-    name="Fine_tuned_model",  # name of the training run
+    workers=4,                            # number of workers for dataloader
+    lr0=0.001,                            # initial learning rate
+    project="runs/detect",  # save to project/name
+    name="Fine_tuned_model"  # name of the training run
 )
-
+"""
+# Tuning the model for a bit
 metrics = model.val()
 print(metrics)
+model.eval()
+results = model(Image, save=True, conf=0.5)
 
-results = model(Image)
-results.show()
-"""
+# Get first result
+r = results[0]
+
+boxes = r.boxes  # Boxes object
+#print(boxes)
+for box in boxes:
+    cls = int(box.cls[0])        # class ID
+    conf = float(box.conf[0])    # confidence
+    label = model.names[cls]  # class name (customer_name, total, tip, datetime)
+    xyxy = box.xyxy[0].tolist()  # bounding box coordinates [x1,y1,x2,y2]
+    print(f"Class {cls},label {label}, Conf {conf:.2f}, BBox {xyxy}")
+
+
 
 
 
