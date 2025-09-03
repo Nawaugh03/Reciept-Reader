@@ -8,6 +8,6 @@ names: ['Customer_Name', 'DateTime', 'Tip', 'Total']
 roboflow:
   workspace: reciept-classification
   project: detect-reciept-eumfa
-  version: 8
+  version: 9
   license: CC BY 4.0
-  url: https://universe.roboflow.com/reciept-classification/detect-reciept-eumfa/dataset/8
+  url: https://universe.roboflow.com/reciept-classification/detect-reciept-eumfa/dataset/9

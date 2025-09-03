@@ -15,7 +15,7 @@ model = YOLO("yolov8n.pt")  # 'n' = nano, small and fast to train
 #model.eval()  # set model to evaluation mode
 
 #Image to test
-Image="Receipts/Receipt1.jpg"
+Image="Receipts/Receipt12.jpg"
 
 # If on Windows and PATH not set, manually add tesseract.exe path:
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
@@ -37,9 +37,10 @@ model.train(
 metrics = model.val()
 print(metrics)
 model.eval()
+"""
 results = model(Image, save=True, conf=0.5)
 
-"""
+
 # Get first result
 r = results[0]
 # Load cropped image

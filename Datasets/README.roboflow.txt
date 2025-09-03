@@ -1,8 +1,8 @@
 
-Detect Reciept - v8 2025-08-31 11:48am
+Detect Reciept - v9 2025-09-03 5:57pm
 ==============================
 
-This dataset was exported via roboflow.com on August 31, 2025 at 3:52 PM GMT
+This dataset was exported via roboflow.com on September 3, 2025 at 9:58 PM GMT
 
 Roboflow is an end-to-end computer vision platform that helps you
 * collaborate with your team on computer vision projects
@@ -17,7 +17,7 @@ visit https://github.com/roboflow/notebooks
 
 To find over 100k other datasets and pre-trained models, visit https://universe.roboflow.com
 
-The dataset includes 340 images.
+The dataset includes 344 images.
 Objects are annotated in YOLOv8 format.
 
 The following pre-processing was applied to each image:
