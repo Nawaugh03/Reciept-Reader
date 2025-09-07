@@ -11,19 +11,19 @@ print("Loading model...")
 #model = YOLO("yolov8n.pt")  # 'n' = nano, small and fast to train
 
 # Load your trained weights (best.pt)
-model = YOLO("runs/detect/Fine_tuned_model5/weights/best.pt")
+model = YOLO("runs/detect/Fine_tuned_model8/weights/best.pt")
 
 #model.eval()  # set model to evaluation mode
 
 #Image to test
-Image="Receipts/Receipt3.jpg"
+Image="Receipts/Receipt2.jpg"
 
 # If on Windows and PATH not set, manually add tesseract.exe path:
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 custom_config_number = r'--oem 3 --psm 6 outputbase digits'
 custom_config_text= r'--oem 3 --psm 6 tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-
+"""
 # Train the model
 model.train(
     data="Datasets/data.yaml",  # path to data.yaml
@@ -33,13 +33,13 @@ model.train(
     name="Fine_tuned_model",           # model name
     project="runs/detect"            # project name
 )
-
+"""
 # Tuning the model for a bit
 metrics = model.val()
 print(metrics)
 model.eval()
 
-""""
+
 results = model(Image, save=True, conf=0.5)
 
 
@@ -81,18 +81,21 @@ for box in boxes:
         gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
         # OCR
-        variable = pytesseract.image_to_string(gray, config="--psm 6")
+        if label in ["total", "tip"]:
+            variable = pytesseract.image_to_string(gray, config=custom_config_number)
+            variable = re.sub(r'[^\d.]', '', variable)
+        else:
+            variable = pytesseract.image_to_string(gray, config=custom_config_text)
     else:
         variable = "[empty crop]"
     print(f"{ label}: {variable} \n{conf:.2f}, {xyxy}")
     # 🔹 Draw bounding box + label on the image
-    cv2.rectangle(img_copy, (x1, y1), (x2, y2), (0, 255, 0), 2)
-    cv2.putText(img_copy, f"{label} {conf:.2f}", (x1, y1 - 10),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+    #cv2.rectangle(img_copy, (x1, y1), (x2, y2), (0, 255, 0), 2)
+    #cv2.putText(img_copy, f"{label} {conf:.2f}", (x1, y1 - 10),
+   #             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
 # 🔹 Show with matplotlib
-plt.figure(figsize=(12, 8))
-plt.imshow(cv2.cvtColor(img_copy, cv2.COLOR_BGR2RGB))
-plt.axis("off")
-plt.show()
-"""
+#plt.figure(figsize=(12, 8))
+#plt.imshow(cv2.cvtColor(img_copy, cv2.COLOR_BGR2RGB))
+#plt.axis("off")
+#plt.show()
