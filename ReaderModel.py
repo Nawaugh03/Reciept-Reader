@@ -1,6 +1,6 @@
 import cv2
 import csv
-import os
+import shutil, os
 import re
 import pytesseract
 from ultralytics import YOLO
@@ -115,3 +115,8 @@ df["file_num"] = df["Filename"].str.extract(r'(\d+)').astype(int)
 df = df.sort_values(by="file_num").drop(columns="file_num").reset_index(drop=True)
 
 df.to_csv("Results.csv", index=False)
+
+# Now delete YOLO's output folder
+pred_path = "runs/detect/predict"
+if os.path.exists(pred_path):
+    shutil.rmtree(pred_path)
