@@ -50,30 +50,20 @@ def get_results(Image_paths, df):
         "Tip": None,
         "DateTime": None
         }
-        results = model(Image_paths, save=True, conf=0.5)
+        results = model(Image_paths, 
+                        save=True,
+                        project="output",
+                        name="latest",
+                        conf=0.5)
         # Get first result
         r = results[0]
-        # Load cropped image
         img = cv2.imread(Image_paths)
-        img_copy = img.copy()
-        # Convert to grayscale
-        gray = cv2.cvtColor(img_copy, cv2.COLOR_BGR2GRAY)
-
-        # Resize (upscale) the cropped region
-        gray = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-
-        # Apply threshold (binarization)
-        thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-
-        # Optional: remove noise with median blur
-        denoised = cv2.medianBlur(thresh, 3)
-
         boxes = r.boxes  # Boxes object
         #print(boxes)
         for box in boxes:
             cls = int(box.cls[0])        # class ID
             conf = float(box.conf[0])    # confidence
-            label = model.names[cls]  # class name (customer_name, total, tip, datetime)
+            label = model.names[cls].strip().title().replace("_", "") # class name (customer_name, total, tip, datetime)
             xyxy = box.xyxy[0].cpu().numpy().astype(int)
             #print(f"Class {cls},label {label}, Conf {conf:.2f}, BBox {xyxy}")
             # Crop detected region
@@ -101,7 +91,7 @@ def get_results(Image_paths, df):
             if label in raw_data:
                 raw_data[label] = variable
 
-            df.loc[len(df)] = raw_data
+        df.loc[len(df)] = raw_data
             
             # 🔹 Draw bounding box + label on the image
             #cv2.rectangle(img_copy, (x1, y1), (x2, y2), (0, 255, 0), 2)
