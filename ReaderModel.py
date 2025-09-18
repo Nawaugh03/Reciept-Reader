@@ -6,6 +6,23 @@ import pytesseract
 from ultralytics import YOLO
 import pandas as pd
 from matplotlib import pyplot as plt
+import glob
+import os
+
+def get_latest_best_pt(base_dir="runs/detect/"):
+    best_pts = glob.glob(os.path.join(base_dir, "**", "weights", "best.pt"), recursive=True)
+    if not best_pts:
+        raise FileNotFoundError("No best.pt found in runs/detect/")
+    latest = max(best_pts, key=os.path.getmtime)
+    return latest
+
+# Usage:
+model_path = get_latest_best_pt()
+print(f"Latest best.pt found at: {model_path}")
+class RRModel(): #Receipt Reader Model class that stores the model and its functionality to be used in a web app
+    pass
+"""
+
 # Load YOLO model (start from pretrained weights)
 print("Loading model...")
 #model = YOLO("yolov8n.pt")  # 'n' = nano, small and fast to train
@@ -23,7 +40,7 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 
 custom_config_number = r'--oem 3 --psm 6 outputbase digits'
 custom_config_text= r'--oem 3 --psm 6 tessedit_char_whitelist=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-"""
+
 # Train the model
 model.train(
     data="Datasets/data.yaml",  # path to data.yaml
@@ -33,7 +50,7 @@ model.train(
     name="Fine_tuned_model",           # model name
     project="runs/detect"            # project name
 )
-"""
+
 # Tuning the model for a bit
 metrics = model.val()
 print(metrics)
@@ -51,7 +68,7 @@ def get_results(Image_paths, df):
         "DateTime": None
         }
         results = model(Image_paths, 
-                        save=True,
+                        save=False,
                         project="output",
                         name="latest",
                         conf=0.5)
@@ -120,3 +137,5 @@ df.to_csv("Results.csv", index=False)
 pred_path = "runs/detect/predict"
 if os.path.exists(pred_path):
     shutil.rmtree(pred_path)
+"""
+#--- END IGNORE ---
