@@ -47,6 +47,18 @@ class RRModel(): #Receipt Reader Model class that stores the model and its funct
             )
         self.modeltype = self.get_latest_best_pt()  # Update to the newly trained model
         self.model = self.load_model()  # Reload the model with new weights
+    
+    def format_usd(self, value):
+        value = re.sub(r'[^\d]', '', value)  # Remove non-digit characters
+        if not value:
+            return ""
+        # If value is all digits, treat last two as cents
+        if len(value) > 2:
+            amount = float(value[:-2] + '.' + value[-2:])
+        else:
+            amount = float('0.' + value.zfill(2))
+        return f"${amount:,.2f}"
+        
     def evaluate_model(self):
         metrics = self.model.val()
         print(metrics)
@@ -58,8 +70,8 @@ class RRModel(): #Receipt Reader Model class that stores the model and its funct
         raw_data = {
         "Filename": Image_paths,
         "Customer_Name": None,
-        "Total": None,
-        "Tip": 0.00,
+        "Total": "$0.00",
+        "Tip": "$0.00",
         "Datetime": None
         }
         results = self.model(Image_paths, 
@@ -93,7 +105,7 @@ class RRModel(): #Receipt Reader Model class that stores the model and its funct
                 # OCR
                 if label in ["Total", "Tip"]:
                     variable = pytesseract.image_to_string(gray, config=self.custom_config_number)
-                    variable = re.sub(r'[^\d.]', '', variable)
+                    variable = self.format_usd(variable)
                 else:
                     variable = pytesseract.image_to_string(gray, config=self.custom_config_text)
                     if label == "Customer_Name":
@@ -124,8 +136,14 @@ class RRModel(): #Receipt Reader Model class that stores the model and its funct
         self.df["file_num"] = self.df["Filename"].str.extract(r'(\d+)').astype(int)
         self.df = self.df.sort_values(by="file_num").drop(columns="file_num").reset_index(drop=True)
 
-    def save_results(self, filename="Results.csv"):
+    def save_results_csv(self, filename="Results.csv"):
         self.df.to_csv(filename, index=False)
+        # Now delete YOLO's output folder
+        pred_path = "runs/detect/predict"
+        if os.path.exists(pred_path):
+            shutil.rmtree(pred_path)
+    def save_results_excel(self, filename="Results.xlsx"):
+        self.df.to_excel(filename, index=False)
         # Now delete YOLO's output folder
         pred_path = "runs/detect/predict"
         if os.path.exists(pred_path):
